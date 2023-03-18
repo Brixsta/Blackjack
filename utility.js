@@ -334,15 +334,20 @@ export function drawOptionsContainer() {
   }
 }
 export function handleHitButtonClick() {
+  const stand = state.global.stand;
   const dealt = allCardsDealt();
   const visible = playerCardsVisible();
   const outcome = state.global.outcome;
-  if (dealt && visible && outcome === null) {
+  if (dealt && visible && !outcome && state.global.canHit && !stand) {
+    state.global.canHit = false;
     const audio = new Audio();
     audio.src = "./audio/click.mp3";
     audio.volume = 0.02;
     audio.play();
     playerHits();
+    setTimeout(() => {
+      state.global.canHit = true;
+    }, 1500);
   }
 }
 
@@ -389,11 +394,15 @@ function allCardsDealt() {
 }
 
 function handleStandButtonClick() {
-  state.global.stand = true;
-  const audio = new Audio();
-  audio.src = "./audio/click.mp3";
-  audio.volume = 0.02;
-  audio.play();
+  const dealt = allCardsDealt();
+  if (!state.global.stand && dealt) {
+    const audio = new Audio();
+    audio.src = "./audio/click.mp3";
+    audio.volume = 0.02;
+    audio.play();
+    state.global.stand = true;
+  }
+
   const result = allCardsDealt();
   if (result) {
     disableButtons();
@@ -450,6 +459,7 @@ function dealerHits() {
 }
 
 export function playerHits() {
+  state.global.stand = true;
   const card = grabRandomCard();
   const playerHand = state.global.playerHand;
   playerHand.push(card);
@@ -548,6 +558,7 @@ function handleReplayButtonClick() {
   state.global.theme.play();
   state.global.theme.loop = true;
   state.global.stand = false;
+  state.global.canHit = true;
   creation.createCards();
   creation.createChips();
 }
@@ -675,6 +686,7 @@ export function handleModalClick() {
   state.global.dealingFinished = false;
   state.global.placeBets = true;
   state.global.bettingInventory = [];
+  state.global.canHit = true;
   removeModal();
   resetCards();
   resetCounts();
@@ -901,30 +913,12 @@ export function createModalByOutcome() {
 function disableButtons() {
   const hitButton = document.querySelector(".hit-button");
   const standButton = document.querySelector(".stand-button");
-  if (hitButton && standButton) {
-    hitButton.setAttribute("disabled", true);
-    hitButton.classList.remove("button-hoverclass");
-    standButton.setAttribute("disabled", true);
-    standButton.classList.remove("button-hoverclass");
-  }
-}
-
-export function detectCardsMoving() {
   const dealerMoving = state.global.dealerHand.some((card) => card.moving);
   const playerMoving = state.global.playerHand.some((card) => card.moving);
-  const hitButton = document.querySelector(".hit-button");
-  const standButton = document.querySelector(".stand-button");
-  const stand = state.global.stand;
-
-  if (playerMoving || dealerMoving) {
+  if (hitButton && standButton && playerMoving && dealerMoving) {
     hitButton.setAttribute("disabled", true);
     hitButton.classList.remove("button-hoverclass");
     standButton.setAttribute("disabled", true);
     standButton.classList.remove("button-hoverclass");
-  } else if (hitButton && standButton && !stand) {
-    hitButton.classList.add("button-hoverclass");
-    hitButton.removeAttribute("disabled");
-    standButton.classList.add("button-hoverclass");
-    standButton.removeAttribute("disabled");
   }
 }
