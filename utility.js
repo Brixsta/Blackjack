@@ -186,34 +186,55 @@ export function setCardDestination() {
       playerX = state.canvas.width / 2 - 138 - playerCardDealerCardGap;
       playerY = state.canvas.height / 2 - yOffset + ySpacingBetweenCards * 2;
     }
+    if (i === 6) {
+      playerX =
+        state.canvas.width / 2 -
+        276 -
+        playerCardDealerCardGap -
+        xSpacingBetweenCards;
+      playerY = state.canvas.height / 2 - yOffset + ySpacingBetweenCards * 3;
+    }
+
+    if (i === 7) {
+      playerX = state.canvas.width / 2 - 138 - playerCardDealerCardGap;
+      playerY = state.canvas.height / 2 - yOffset + ySpacingBetweenCards * 3;
+    }
     playerHand[i].destinationX = playerX;
     playerHand[i].destinationY = playerY;
   }
   // set dealer cards destination
   for (let i = 0; i < dealerHand.length; i++) {
     if (i === 0) {
-      dealerX = state.canvas.width / 2 + playerCardDealerCardGap;
+      dealerX = state.canvas.width / 2 + 188 + xSpacingBetweenCards;
       dealerY = state.canvas.height / 2 - yOffset;
     }
     if (i === 1) {
-      dealerX = state.canvas.width / 2 + 188 + xSpacingBetweenCards;
+      dealerX = state.canvas.width / 2 + playerCardDealerCardGap;
       dealerY = state.canvas.height / 2 - yOffset;
     }
     if (i === 2) {
-      dealerX = state.canvas.width / 2 + 188 + xSpacingBetweenCards;
+      dealerX = state.canvas.width / 2 + playerCardDealerCardGap;
       dealerY = state.canvas.height / 2 - yOffset + ySpacingBetweenCards;
     }
     if (i === 3) {
-      dealerX = state.canvas.width / 2 + playerCardDealerCardGap;
+      dealerX = state.canvas.width / 2 + 188 + xSpacingBetweenCards;
       dealerY = state.canvas.height / 2 - yOffset + ySpacingBetweenCards;
     }
     if (i === 4) {
-      dealerX = state.canvas.width / 2 + 188 + xSpacingBetweenCards;
+      dealerX = state.canvas.width / 2 + playerCardDealerCardGap;
       dealerY = state.canvas.height / 2 - yOffset + ySpacingBetweenCards * 2;
     }
     if (i === 5) {
-      dealerX = state.canvas.width / 2 + playerCardDealerCardGap;
+      dealerX = state.canvas.width / 2 + 188 + xSpacingBetweenCards;
       dealerY = state.canvas.height / 2 - yOffset + ySpacingBetweenCards * 2;
+    }
+    if (i === 6) {
+      dealerX = state.canvas.width / 2 + playerCardDealerCardGap;
+      dealerY = state.canvas.height / 2 - yOffset + ySpacingBetweenCards * 3;
+    }
+    if (i === 7) {
+      dealerX = state.canvas.width / 2 + 188 + xSpacingBetweenCards;
+      dealerY = state.canvas.height / 2 - yOffset + ySpacingBetweenCards * 3;
     }
     dealerHand[i].destinationX = dealerX;
     dealerHand[i].destinationY = dealerY;
@@ -397,12 +418,17 @@ function dealerHits() {
     const card = grabRandomCard();
     const dealerHand = state.global.dealerHand;
     const playerCount = state.global.playerCount;
+    let dealerCount = state.global.dealerCount + card.value;
+    const aces = dealerHand.filter((card) => card.value === 11);
+
+    if (aces) {
+      dealerCount = state.global.dealerCount;
+    }
+
     setTimeout(() => {
       dealerHand.push(card);
-      const dealerCount = state.global.dealerCount + card.value;
-      if (dealerCount < playerCount && dealerCount < 21) {
+      if (dealerCount < 21 && dealerCount < playerCount)
         state.global.dealerHits = true;
-      }
     }, 1000);
   }
 }
@@ -513,6 +539,20 @@ export function checkForPlayerGoingOver() {
   const playerHand = state.global.playerHand;
   const outcome = state.global.outcome;
 
+  let playerHiddenCount = 0;
+
+  // find hidden player count
+  for (let i = 0; i < playerHand.length; i++) {
+    let curr = playerHand[i];
+    playerHiddenCount += curr.value;
+  }
+  const aces = playerHand.filter((card) => card.value === 11);
+
+  // set value of ace to 1
+  if (aces.length && playerHiddenCount > 21) {
+    aces[0].value = 1;
+  }
+
   const visible = playerHand.every((card) => card.hidden === false);
   if (visible && dealCards) {
     const playerCount = state.global.playerCount;
@@ -530,6 +570,21 @@ export function checkForDealerGoingOver() {
   const dealCards = state.global.dealCards;
   const visible = allCardsVisible();
   const outcome = state.global.outcome;
+  const dealerHand = state.global.dealerHand;
+
+  let dealerHiddenCount = 0;
+
+  // find hidden dealer count
+  for (let i = 0; i < dealerHand.length; i++) {
+    let curr = dealerHand[i];
+    dealerHiddenCount += curr.value;
+  }
+  const aces = dealerHand.filter((card) => card.value === 11);
+  // set value of ace to 1
+  if (aces.length && dealerHiddenCount > 21) {
+    aces[0].value = 1;
+  }
+
   if (visible && dealCards && outcome === null) {
     if (state.global.dealerCount > 21 && state.global.outcome === null) {
       revealDealerCards();
@@ -751,7 +806,13 @@ export function createModalByOutcome() {
     playOutcomeSound("./lose.mp3", 0.05);
     createModal("Dealer Wins!");
   }
-  if (outcome === "push") createModal("Push!");
+  if (outcome === "push") {
+    createModal("Push!");
+    const dealt = dealerCardsDealt();
+    if (dealt) {
+      playOutcomeSound("./push.wav", 0.5);
+    }
+  }
   if (outcome === "blackjack-player") {
     createModal("Blackjack!");
     const dealt = playerCardsDealt();

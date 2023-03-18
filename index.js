@@ -43,8 +43,10 @@ function animate() {
   utility.updateBettingCash();
   placeBetsTitle.draw();
   placeBetsTitle.move();
+  placeBetsTitle.opacityEffect();
   dealCardsTitle.draw();
   dealCardsTitle.move();
+  dealCardsTitle.opacityEffect();
   utility.updateCounts();
   utility.setCardDestination();
   utility.dealCardsAnimation();

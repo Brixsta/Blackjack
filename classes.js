@@ -278,6 +278,8 @@ export class PlaceBetsTitle {
       }
     }
   }
+
+  opacityEffect() {}
 }
 
 export class DealCardsTitle {
@@ -286,16 +288,28 @@ export class DealCardsTitle {
     this.y = 0;
     this.opacity = 0;
     this.opacityVelocity = 0.01;
+    this.hidden = false;
   }
 
   draw() {
     state.ctx.save();
-    if (state.global.dealCards) {
-      state.ctx.globalAlpha = 1;
+
+    if (state.global.dealCards && !this.hidden) {
       if (this.opacity < 1) {
         this.opacity += this.opacityVelocity;
         this.opacityVelocity += 0.001;
       }
+    }
+
+    if (this.hidden) {
+      if (this.opacity >= 0) {
+        this.opacity -= this.opacityVelocity;
+        this.opacityVelocity += 0.001;
+      }
+    }
+
+    if (state.global.dealCards) {
+      state.ctx.globalAlpha = 1;
       state.ctx.font = "60px Noto Serif Lao";
       state.ctx.fillStyle = `rgba(255,255,255,${this.opacity})`;
       state.ctx.strokeStyle = `rgba(0,0,0,${this.opacity})`;
@@ -307,14 +321,39 @@ export class DealCardsTitle {
   }
 
   move() {
-    if (state.global.dealCards) {
+    if (state.global.dealCards && !this.hidden) {
       if (this.y < 60) {
         this.y += 4;
       } else {
         this.y = 60;
       }
+    } else if (this.hidden) {
+      if (this.y > 0) {
+        this.y -= 4;
+      } else {
+        this.y = 0;
+        this.opacity = 0;
+        this.opacityVelocity = 0.01;
+      }
     }
   }
+
+  toggleHidden() {
+    const playerHand = state.global.playerHand;
+    const dealerHand = state.global.dealerHand;
+    const dealCards = state.global.dealCards;
+    const playerFinished = playerHand.every(
+      (card) => card.x === card.destinationX && card.y === card.destinationY
+    );
+    const dealerFinished = dealerHand.every(
+      (card) => card.x === card.destinationX && card.y === card.destinationY
+    );
+    if (playerFinished && dealerFinished && dealCards) {
+      this.hidden = true;
+    }
+  }
+
+  opacityEffect() {}
 }
 
 export function drawConsole() {
