@@ -655,6 +655,7 @@ export function createModal(str) {
       modalText.innerText = str;
       canvasContainer.appendChild(modalText);
       modalBackground.addEventListener("click", handleModalClick);
+      modalText.addEventListener("click", handleModalClick);
     }
   }, 1000);
 }
@@ -730,6 +731,7 @@ function removeModal() {
   const modalBackground = document.querySelector(".modal-background");
   const modalText = document.querySelector(".modal-text");
   modalBackground.removeEventListener("click", handleModalClick);
+  modalText.removeEventListener("click", handleModalClick);
   modalText.remove();
   modalBackground.remove();
   const optionsContainer = document.querySelector(".options-container");
@@ -745,20 +747,66 @@ function resetCounts() {
   dealerContainer.innerText = `Dealer: ${state.global.dealerCount}`;
 }
 
-function moveBettingChipsToInventory() {
-  const inventory = state.global.inventory;
-  const bettingInventory = state.global.bettingInventory;
-  while (bettingInventory.length) {
-    const chip = bettingInventory.pop();
-    const value = chip.value;
-    inventory.push(chip);
-    inventory.push(new classes.Chip(value, 1000, 1000, state.global.chipCount));
+function organizeInventoryChips() {
+  let amt = state.global.inventoryCash;
+  state.global.inventory = [];
+  while (amt >= 2000) {
+    const chip = new classes.Chip(500, 1000, 1000, state.global.chipCount);
+    state.global.inventory.push(chip);
     state.global.chipCount++;
+    amt -= 500;
+  }
+
+  while (amt >= 400) {
+    const chip = new classes.Chip(100, 1000, 1000, state.global.chipCount);
+    state.global.inventory.push(chip);
+    state.global.chipCount++;
+    amt -= 100;
+  }
+
+  while (amt >= 90) {
+    const chip = new classes.Chip(10, 1000, 1000, state.global.chipCount);
+    state.global.inventory.push(chip);
+    state.global.chipCount++;
+    amt -= 10;
+  }
+
+  while (amt >= 1) {
+    const chip = new classes.Chip(1, 1000, 1000, state.global.chipCount);
+    state.global.inventory.push(chip);
+    state.global.chipCount++;
+    amt -= 1;
+  }
+  let numOfOneChips = state.global.inventory.filter((chip) => chip.value === 1);
+  let oneChipsDeleted;
+  const totalChips = state.global.inventory.length;
+  if (numOfOneChips.length > 10) {
+    state.global.inventory = state.global.inventory.filter(
+      (chip) => chip.value !== 1
+    );
+    oneChipsDeleted = totalChips - state.global.inventory.length;
+  }
+  while (oneChipsDeleted > 10) {
+    const chip = new classes.Chip(10, 1000, 1000, state.global.chipCount);
+    state.global.inventory.push(chip);
+    oneChipsDeleted -= 10;
+  }
+  while (oneChipsDeleted > 0) {
+    const chip = new classes.Chip(1, 1000, 1000, state.global.chipCount);
+    state.global.inventory.push(chip);
+    oneChipsDeleted -= 1;
+  }
+  let myCount = 0;
+
+  for (let i = 0; i < state.global.inventory.length; i++) {
+    let curr = state.global.inventory[i];
+    myCount += curr.value;
   }
   repositionInventoryChips();
 }
 
 function addBettingChipsAmountToCash() {
+  state.global.bettingCash = 0;
   let amt = 0;
   const bettingInventory = state.global.bettingInventory;
   for (let i = 0; i < bettingInventory.length; i++) {
@@ -766,7 +814,6 @@ function addBettingChipsAmountToCash() {
     amt += curr.value;
   }
   state.global.inventoryCash += amt * 2;
-  state.global.bettingCash = 0;
 }
 
 function handlePlayerLoss() {
@@ -776,7 +823,7 @@ function handlePlayerLoss() {
 
 function handlePlayerWins() {
   addBettingChipsAmountToCash();
-  moveBettingChipsToInventory();
+  organizeInventoryChips();
 }
 
 function resetCards() {

@@ -7,4 +7,3 @@
 - Utilized OOP
 - A LOT of edge cases
 - Deal cards animation used Math.atan2
-

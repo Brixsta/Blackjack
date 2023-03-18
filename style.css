@@ -166,6 +166,10 @@ button {
   opacity: 0.8;
 }
 
+.modal-background:hover {
+  cursor: pointer;
+}
+
 .modal-text {
   color: gold;
   font-family: "Noto Serif Lao", serif;
@@ -175,6 +179,10 @@ button {
   top: 50%;
   transform: translate(-50%, -50%);
   user-select: none;
+}
+
+.modal-text {
+  cursor: pointer;
 }
 
 .game-over-container {
