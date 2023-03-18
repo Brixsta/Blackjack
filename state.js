@@ -2,7 +2,7 @@ export const canvas = document.getElementById("game");
 export const ctx = canvas.getContext("2d");
 
 export const global = {
-  theme: new Audio("./theme.mp3"),
+  theme: new Audio("./audio/theme.mp3"),
   cards: [],
   playerCount: 0,
   dealerCount: 0,
@@ -20,6 +20,7 @@ export const global = {
   placeBets: false,
   dealCards: false,
   dealerHits: true,
+  stand: false,
   mouseDown: false,
   mouseUp: false,
   outcome: null,

@@ -18,7 +18,7 @@ export function handleGameStart() {
   state.global.theme.volume = 0.005;
   state.global.theme.loop = true;
   const audio = new Audio();
-  audio.src = "./placebets.mp3";
+  audio.src = "./audio/placebets.mp3";
   audio.volume = 0.04;
   audio.play();
   state.global.inPlay = true;
@@ -49,6 +49,7 @@ export function drawDealButton() {
     const dealButton = document.createElement("button");
     dealButton.innerText = "Deal";
     dealButton.classList.add("deal-button");
+    dealButton.classList.add("button-hoverclass");
     const canvasContainer = document.querySelector(".canvas-container");
     canvasContainer.append(dealButton);
     dealButton.addEventListener("click", handleDealButtonClick);
@@ -66,6 +67,10 @@ export function drawDealButton() {
 }
 
 export function handleDealButtonClick() {
+  const audio = new Audio();
+  audio.src = "./audio/click.mp3";
+  audio.volume = 0.02;
+  audio.play();
   const dealButton = document.querySelector(".deal-button");
   dealButton.removeEventListener("click", handleDealButtonClick);
   dealButton.style.animationName = "fadeOut";
@@ -323,7 +328,9 @@ export function drawOptionsContainer() {
     standButton.innerText = "Stand";
     optionsContainer.appendChild(standButton);
     hitButton.addEventListener("click", handleHitButtonClick);
+    hitButton.classList.add("button-hoverclass");
     standButton.addEventListener("click", handleStandButtonClick);
+    standButton.classList.add("button-hoverclass");
   }
 }
 export function handleHitButtonClick() {
@@ -331,6 +338,10 @@ export function handleHitButtonClick() {
   const visible = playerCardsVisible();
   const outcome = state.global.outcome;
   if (dealt && visible && outcome === null) {
+    const audio = new Audio();
+    audio.src = "./audio/click.mp3";
+    audio.volume = 0.02;
+    audio.play();
     playerHits();
   }
 }
@@ -378,6 +389,11 @@ function allCardsDealt() {
 }
 
 function handleStandButtonClick() {
+  state.global.stand = true;
+  const audio = new Audio();
+  audio.src = "./audio/click.mp3";
+  audio.volume = 0.02;
+  audio.play();
   const result = allCardsDealt();
   if (result) {
     disableButtons();
@@ -445,7 +461,7 @@ function revealDealerCards() {
     state.global.revealSound = false;
     setTimeout(() => {
       const audio = new Audio();
-      audio.src = "./whoosh.mp3";
+      audio.src = "./audio/whoosh.mp3";
       audio.volume = 0.1;
       audio.play();
     }, 1000);
@@ -470,7 +486,7 @@ function gameOver() {
   if (inPlay) {
     state.global.theme.pause();
     const audio = new Audio();
-    audio.src = "./broke.m4a";
+    audio.src = "./audio/broke.m4a";
     audio.volume = 0.03;
     audio.play();
     const modalBackground = document.createElement("div");
@@ -487,6 +503,7 @@ function gameOver() {
     outOfFundsTitle.innerText = "Out of Funds!";
     const replayButton = document.createElement("button");
     replayButton.classList.add("replay-button");
+    replayButton.classList.add("button-hoverclass");
     replayButton.innerText = "Replay";
     gameOverContainer.appendChild(outOfFundsTitle);
     gameOverContainer.appendChild(replayButton);
@@ -496,7 +513,7 @@ function gameOver() {
 
 function handleReplayButtonClick() {
   const audio = new Audio();
-  audio.src = "./placebets.mp3";
+  audio.src = "./audio/placebets.mp3";
   audio.volume = 0.02;
   audio.play();
   const modalBackground = document.querySelector(".modal-background");
@@ -530,6 +547,7 @@ function handleReplayButtonClick() {
   state.global.theme.currentTime = 0.5;
   state.global.theme.play();
   state.global.theme.loop = true;
+  state.global.stand = false;
   creation.createCards();
   creation.createChips();
 }
@@ -644,11 +662,12 @@ export function createModal(str) {
 export function handleModalClick() {
   if (state.global.bettingCash !== 0 && state.global.inventoryCash !== 0) {
     const audio = new Audio();
-    audio.src = "./placebets.mp3";
+    audio.src = "./audio/placebets.mp3";
     audio.volume = 0.02;
     audio.play();
   }
   handleOutcomes();
+  state.global.stand = false;
   state.global.outcomeSound = true;
   state.global.revealSound = true;
   state.global.dealerHits = true;
@@ -799,18 +818,18 @@ export function createModalByOutcome() {
   const outcome = state.global.outcome;
   if (outcome) disableButtons();
   if (outcome === "player") {
-    playOutcomeSound("./youwin.mp3", 0.1);
+    playOutcomeSound("./audio/youwin.mp3", 0.1);
     createModal("Player Wins!");
   }
   if (outcome === "dealer") {
-    playOutcomeSound("./lose.mp3", 0.05);
+    playOutcomeSound("./audio/lose.mp3", 0.05);
     createModal("Dealer Wins!");
   }
   if (outcome === "push") {
     createModal("Push!");
     const dealt = dealerCardsDealt();
     if (dealt) {
-      playOutcomeSound("./push.wav", 0.5);
+      playOutcomeSound("./audio/push.wav", 0.5);
     }
   }
   if (outcome === "blackjack-player") {
@@ -819,7 +838,7 @@ export function createModalByOutcome() {
     const playerHand = state.global.playerHand;
 
     if (dealt && playerHand.length) {
-      playOutcomeSound("./blackjack.mp3", 0.3);
+      playOutcomeSound("./audio/blackjack.mp3", 0.3);
     }
   }
   if (outcome === "blackjack-dealer") {
@@ -827,7 +846,7 @@ export function createModalByOutcome() {
     const dealt = dealerCardsDealt();
     const dealerHand = state.global.dealerHand;
     if (dealt && dealerHand.length) {
-      playOutcomeSound("./blackjack.mp3", 0.3);
+      playOutcomeSound("./audio/blackjack.mp3", 0.3);
     }
   }
 }
@@ -837,6 +856,28 @@ function disableButtons() {
   const standButton = document.querySelector(".stand-button");
   if (hitButton && standButton) {
     hitButton.setAttribute("disabled", true);
+    hitButton.classList.remove("button-hoverclass");
     standButton.setAttribute("disabled", true);
+    standButton.classList.remove("button-hoverclass");
+  }
+}
+
+export function detectCardsMoving() {
+  const dealerMoving = state.global.dealerHand.some((card) => card.moving);
+  const playerMoving = state.global.playerHand.some((card) => card.moving);
+  const hitButton = document.querySelector(".hit-button");
+  const standButton = document.querySelector(".stand-button");
+  const stand = state.global.stand;
+
+  if (playerMoving || dealerMoving) {
+    hitButton.setAttribute("disabled", true);
+    hitButton.classList.remove("button-hoverclass");
+    standButton.setAttribute("disabled", true);
+    standButton.classList.remove("button-hoverclass");
+  } else if (hitButton && standButton && !stand) {
+    hitButton.classList.add("button-hoverclass");
+    hitButton.removeAttribute("disabled");
+    standButton.classList.add("button-hoverclass");
+    standButton.removeAttribute("disabled");
   }
 }

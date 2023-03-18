@@ -1,6 +1,9 @@
 import * as state from "./state.js";
 import * as utility from "./utility.js";
 
+const cardBacking = new Image();
+cardBacking.src = "./images/cards/card_background.png";
+
 export class Chip {
   constructor(value, x, y, id) {
     this.value = value;
@@ -90,7 +93,7 @@ export class Chip {
   moveChipToBettingArea() {
     if (this.mouseHover && state.global.mouseDown && state.global.placeBets) {
       const chipSound = new Audio();
-      chipSound.src = "./chip.mp3";
+      chipSound.src = "./audio/chip.mp3";
       chipSound.play();
       chipSound.volume = 0.01;
       state.global.mouseDown = false;
@@ -118,7 +121,7 @@ export class Chip {
   moveChipToInventory() {
     if (state.global.mouseDown && this.mouseHover) {
       const chipSound = new Audio();
-      chipSound.src = "./chip.mp3";
+      chipSound.src = "./audio/chip.mp3";
       chipSound.play();
       chipSound.volume = 0.01;
       state.global.mouseDown = false;
@@ -169,6 +172,7 @@ export class Card {
   draw() {
     if (!this.hidden && state.global.dealCards) {
       state.ctx.save();
+      state.ctx.shadowBlur = 10;
       if (this.opacity < 1) {
         this.opacity += this.opacityVelocity;
         this.opacityVelocity += 0.0007;
@@ -178,30 +182,32 @@ export class Card {
       state.ctx.drawImage(this.face, this.x, this.y, this.width, this.height);
       state.ctx.restore();
     } else if (this.hidden && state.global.dealCards) {
-      state.ctx.shadowBlur = 0;
-      state.ctx.fillStyle = "red";
-      state.ctx.fillRect(this.x, this.y, this.width, this.height);
+      state.ctx.shadowBlur = 10;
+      state.ctx.drawImage(cardBacking, this.x, this.y, this.width, this.height);
     }
   }
 
   move() {
     if (this.moving) {
+      const dx = this.x - this.destinationX;
+      const dy = this.destinationY - this.y;
+      const angle = Math.atan2(dy, dx);
       if (this.dealSound) {
         this.dealSound = false;
         const dealSound = new Audio("");
-        dealSound.src = "./deal.mp3";
+        dealSound.src = "./audio/deal.mp3";
         dealSound.play();
         dealSound.volume = 0.1;
       }
 
       if (this.x > this.destinationX) {
-        this.x -= 15;
+        this.x -= Math.cos(angle) * 25;
       } else {
         this.x = this.destinationX;
       }
 
       if (this.y < this.destinationY) {
-        this.y += 15;
+        this.y += Math.sin(angle) * 25;
       } else {
         this.y = this.destinationY;
       }

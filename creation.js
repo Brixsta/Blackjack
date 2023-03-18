@@ -148,8 +148,18 @@ export function createChips() {
 }
 
 export function drawBackground() {
-  state.ctx.fillStyle = "green";
   state.ctx.globalAlpha = 1;
+  var grd = state.ctx.createRadialGradient(
+    state.canvas.width / 2,
+    state.canvas.width / 2,
+    100,
+    state.canvas.width / 2,
+    state.canvas.height / 2,
+    300
+  );
+  grd.addColorStop(0, "green");
+  grd.addColorStop(1, "darkgreen");
+  state.ctx.fillStyle = grd;
   state.ctx.fillRect(0, 0, state.canvas.width, state.canvas.height);
 }
 
