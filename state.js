@@ -20,7 +20,7 @@ export const global = {
   placeBets: false,
   dealCards: false,
   dealerHits: true,
-  canHit: true,
+  isHitting: false,
   stand: false,
   mouseDown: false,
   mouseUp: false,

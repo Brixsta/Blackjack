@@ -334,20 +334,24 @@ export function drawOptionsContainer() {
   }
 }
 export function handleHitButtonClick() {
-  const stand = state.global.stand;
-  const dealt = allCardsDealt();
+  state.global.isHitting = true;
+  const audio = new Audio();
+  audio.src = "./audio/click.mp3";
+  audio.volume = 0.02;
+  audio.play();
+  playerHits();
+}
+
+export function toggleButtons() {
+  const hitting = state.global.isHitting;
   const visible = playerCardsVisible();
+  const dealt = dealerCardsDealt();
+  const stand = state.global.stand;
   const outcome = state.global.outcome;
-  if (dealt && visible && !outcome && state.global.canHit && !stand) {
-    state.global.canHit = false;
-    const audio = new Audio();
-    audio.src = "./audio/click.mp3";
-    audio.volume = 0.02;
-    audio.play();
-    playerHits();
-    setTimeout(() => {
-      state.global.canHit = true;
-    }, 1500);
+  if (!hitting && visible && dealt && !stand && !outcome) {
+    enableButtons();
+  } else {
+    disableButtons();
   }
 }
 
@@ -394,20 +398,12 @@ function allCardsDealt() {
 }
 
 function handleStandButtonClick() {
-  const dealt = allCardsDealt();
-  if (!state.global.stand && dealt) {
-    const audio = new Audio();
-    audio.src = "./audio/click.mp3";
-    audio.volume = 0.02;
-    audio.play();
-    state.global.stand = true;
-  }
-
-  const result = allCardsDealt();
-  if (result) {
-    disableButtons();
-    revealDealerCards();
-  }
+  state.global.stand = true;
+  revealDealerCards();
+  const audio = new Audio();
+  audio.src = "./audio/click.mp3";
+  audio.volume = 0.02;
+  audio.play();
 }
 
 export function determineIfDealerHits() {
@@ -459,10 +455,12 @@ function dealerHits() {
 }
 
 export function playerHits() {
-  state.global.stand = true;
   const card = grabRandomCard();
   const playerHand = state.global.playerHand;
   playerHand.push(card);
+  setTimeout(() => {
+    state.global.isHitting = false;
+  }, 1500);
 }
 
 function revealDealerCards() {
@@ -558,7 +556,7 @@ function handleReplayButtonClick() {
   state.global.theme.play();
   state.global.theme.loop = true;
   state.global.stand = false;
-  state.global.canHit = true;
+  state.global.isHitting = false;
   creation.createCards();
   creation.createChips();
 }
@@ -680,13 +678,13 @@ export function handleModalClick() {
   }
   handleOutcomes();
   state.global.stand = false;
+  state.global.isHitting = false;
   state.global.outcomeSound = true;
   state.global.revealSound = true;
   state.global.dealerHits = true;
   state.global.dealingFinished = false;
   state.global.placeBets = true;
   state.global.bettingInventory = [];
-  state.global.canHit = true;
   removeModal();
   resetCards();
   resetCounts();
@@ -913,12 +911,21 @@ export function createModalByOutcome() {
 function disableButtons() {
   const hitButton = document.querySelector(".hit-button");
   const standButton = document.querySelector(".stand-button");
-  const dealerMoving = state.global.dealerHand.some((card) => card.moving);
-  const playerMoving = state.global.playerHand.some((card) => card.moving);
-  if (hitButton && standButton && playerMoving && dealerMoving) {
+  if (hitButton && standButton) {
     hitButton.setAttribute("disabled", true);
     hitButton.classList.remove("button-hoverclass");
     standButton.setAttribute("disabled", true);
     standButton.classList.remove("button-hoverclass");
+  }
+}
+
+function enableButtons() {
+  const hitButton = document.querySelector(".hit-button");
+  const standButton = document.querySelector(".stand-button");
+  if (hitButton && standButton) {
+    hitButton.removeAttribute("disabled");
+    hitButton.classList.add("button-hoverclass");
+    standButton.removeAttribute("disabled");
+    standButton.classList.add("button-hoverclass");
   }
 }

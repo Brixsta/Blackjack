@@ -52,6 +52,7 @@ function animate() {
   utility.dealCardsAnimation();
   utility.drawOptionsContainer();
   utility.determineIfDealerHits();
+  utility.toggleButtons();
   window.requestAnimationFrame(animate);
 }
 
