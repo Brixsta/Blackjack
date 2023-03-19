@@ -727,13 +727,17 @@ function handlePush() {
     let curr = bettingInventory[i];
     bettingAmt += curr.value;
   }
-  const inventory = state.global.inventory;
+  let inventory = state.global.inventory;
   while (bettingInventory.length) {
     const chip = bettingInventory.pop();
     inventory.push(chip);
   }
   state.global.bettingCash = 0;
   state.global.inventoryCash += bettingAmt;
+  inventory = inventory.sort((a, b) => {
+    return a.value - b.value;
+  });
+  console.log(inventory);
   repositionInventoryChips();
 }
 
@@ -757,62 +761,46 @@ function resetCounts() {
   dealerContainer.innerText = `Dealer: ${state.global.dealerCount}`;
 }
 
-function organizeInventoryChips() {
-  let amt = state.global.inventoryCash;
+function recalibrateChips() {
   state.global.inventory = [];
-  while (amt >= 2000) {
+  let chipsValueToMake = state.global.inventoryCash;
+  let inventory = state.global.inventory;
+
+  while (chipsValueToMake >= 2000) {
     const chip = new classes.Chip(500, 1000, 1000, state.global.chipCount);
-    state.global.inventory.push(chip);
+    inventory.push(chip);
     state.global.chipCount++;
-    amt -= 500;
+    chipsValueToMake -= 500;
   }
 
-  while (amt >= 400) {
+  while (chipsValueToMake >= 400) {
     const chip = new classes.Chip(100, 1000, 1000, state.global.chipCount);
-    state.global.inventory.push(chip);
+    inventory.push(chip);
     state.global.chipCount++;
-    amt -= 100;
+    chipsValueToMake -= 100;
   }
 
-  while (amt >= 90) {
+  while (chipsValueToMake >= 30) {
     const chip = new classes.Chip(10, 1000, 1000, state.global.chipCount);
-    state.global.inventory.push(chip);
+    inventory.push(chip);
     state.global.chipCount++;
-    amt -= 10;
+    chipsValueToMake -= 10;
   }
 
-  while (amt >= 1) {
+  while (chipsValueToMake >= 1) {
     const chip = new classes.Chip(1, 1000, 1000, state.global.chipCount);
-    state.global.inventory.push(chip);
+    inventory.push(chip);
     state.global.chipCount++;
-    amt -= 1;
+    chipsValueToMake -= 1;
   }
-  let numOfOneChips = state.global.inventory.filter((chip) => chip.value === 1);
-  let oneChipsDeleted;
-  const totalChips = state.global.inventory.length;
-  if (numOfOneChips.length > 10) {
-    state.global.inventory = state.global.inventory.filter(
-      (chip) => chip.value !== 1
-    );
-    oneChipsDeleted = totalChips - state.global.inventory.length;
-  }
-  while (oneChipsDeleted > 10) {
-    const chip = new classes.Chip(10, 1000, 1000, state.global.chipCount);
-    state.global.inventory.push(chip);
-    oneChipsDeleted -= 10;
-  }
-  while (oneChipsDeleted > 0) {
-    const chip = new classes.Chip(1, 1000, 1000, state.global.chipCount);
-    state.global.inventory.push(chip);
-    oneChipsDeleted -= 1;
-  }
-  let myCount = 0;
+  inventory = inventory.sort((a, b) => {
+    return a.value - b.value;
+  });
 
-  for (let i = 0; i < state.global.inventory.length; i++) {
-    let curr = state.global.inventory[i];
-    myCount += curr.value;
+  let sum = 0;
+  for (let i = 0; i < inventory.length; i++) {
+    sum += inventory[i].value;
   }
-  repositionInventoryChips();
 }
 
 function addBettingChipsAmountToCash() {
@@ -824,6 +812,7 @@ function addBettingChipsAmountToCash() {
     amt += curr.value;
   }
   state.global.inventoryCash += amt * 2;
+  state.global.bettingInventory = [];
 }
 
 function handlePlayerLoss() {
@@ -833,7 +822,8 @@ function handlePlayerLoss() {
 
 function handlePlayerWins() {
   addBettingChipsAmountToCash();
-  organizeInventoryChips();
+  recalibrateChips();
+  repositionInventoryChips();
 }
 
 function resetCards() {
