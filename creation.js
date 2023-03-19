@@ -1,11 +1,9 @@
 import * as utility from "./utility.js";
 import * as state from "./state.js";
 import * as classes from "./classes.js";
-export const startGameButton = document.querySelector(".start-game-button");
 window.addEventListener("mouseup", utility.handleMouseUp);
 window.addEventListener("mousedown", utility.handleMouseDown);
 window.addEventListener("mousemove", utility.handleMouseMove);
-startGameButton.addEventListener("click", utility.handleGameStart);
 
 export function createCards() {
   for (let j = 0; j < 4; j++) {

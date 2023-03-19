@@ -17,8 +17,25 @@
   position: relative;
 }
 
-canvas {
-  border: solid 2px black;
+.splash-page-container {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  background-color: white;
+}
+
+.splash-page-container-text {
+  font-family: "Noto Serif Lao", serif;
+  font-size: 60px;
+}
+
+.splash-page-image {
+  height: 400px;
+  width: 272px;
 }
 
 button {
@@ -67,7 +84,8 @@ button {
 
 .hit-button,
 .stand-button,
-.replay-button {
+.replay-button,
+.start-game-button {
   font-family: "Noto Serif Lao", serif;
   font-size: 20px;
   width: 150px;
@@ -85,11 +103,13 @@ button {
   margin-left: 15px;
   margin-right: 15px;
   border-radius: 5px;
+  margin-top: 20px;
 }
 
 .hit-button::after,
 .stand-button::after,
-.replay-button::after {
+.replay-button::after,
+.start-game-button::after {
   position: absolute;
   content: "";
   background-color: white;

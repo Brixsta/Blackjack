@@ -12,6 +12,28 @@ export function handleMouseUp() {
   state.global.mouseDown = false;
 }
 
+export function createSplashPage() {
+  const wrapper = document.querySelector(".wrapper");
+  const splashPageContainer = document.createElement("div");
+  wrapper.appendChild(splashPageContainer);
+  splashPageContainer.classList.add("splash-page-container");
+  const splashPageContainerText = document.createElement("span");
+  splashPageContainerText.classList.add("splash-page-container-text");
+  splashPageContainerText.innerText = "Blackjack";
+  splashPageContainer.appendChild(splashPageContainerText);
+  const splashPageImage = new Image();
+  splashPageImage.src = "./images/cards/ace_of_spades.png";
+  splashPageImage.classList.add("splash-page-image");
+  splashPageContainer.appendChild(splashPageImage);
+  const startGameButton = document.createElement("button");
+  startGameButton.classList.add("button-hoverclass");
+  startGameButton.classList.add("start-game-button");
+  startGameButton.innerText = "Start Game";
+  splashPageContainer.appendChild(startGameButton);
+
+  startGameButton.addEventListener("click", handleGameStart);
+}
+
 export function handleGameStart() {
   state.global.theme.play();
   state.global.theme.currentTime = 0.5;
@@ -24,7 +46,10 @@ export function handleGameStart() {
   state.global.inPlay = true;
   state.global.placeBets = true;
   const startGameButton = document.querySelector(".start-game-button");
+  const splashPageContainer = document.querySelector(".splash-page-container");
+  splashPageContainer.remove();
   startGameButton.setAttribute("disabled", true);
+  startGameButton.removeEventListener("click", handleGameStart);
 }
 
 export function changeCursorToPointer() {
@@ -391,7 +416,7 @@ function playerCardsDealt() {
   if (playerCardsDealt) return true;
 }
 
-function allCardsDealt() {
+export function allCardsDealt() {
   const player = playerCardsDealt();
   const dealer = dealerCardsDealt();
   if (player && dealer) return true;
@@ -737,7 +762,6 @@ function handlePush() {
   inventory = inventory.sort((a, b) => {
     return a.value - b.value;
   });
-  console.log(inventory);
   repositionInventoryChips();
 }
 

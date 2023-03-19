@@ -233,33 +233,23 @@ export class Card {
 export class PlaceBetsTitle {
   constructor() {
     this.x = state.canvas.width / 2;
-    this.y = 0;
-    this.opacity = 0;
-    this.opacityVelocity = 0.01;
+    this.y = -50;
   }
 
   draw() {
     state.ctx.save();
     if (state.global.placeBets) {
       state.ctx.globalAlpha = 1;
-      if (this.opacity < 1) {
-        this.opacity += this.opacityVelocity;
-        this.opacityVelocity += 0.001;
-      }
       state.ctx.font = "60px Noto Serif Lao";
-      state.ctx.fillStyle = `rgba(255,255,255,${this.opacity})`;
-      state.ctx.strokeStyle = `rgba(0,0,0,${this.opacity})`;
+      state.ctx.fillStyle = `rgba(255,255,255,1)`;
+      state.ctx.strokeStyle = `rgba(0,0,0,1)`;
       state.ctx.lineWidth = 5;
       state.ctx.strokeText("Place Your Bets", this.x, this.y);
       state.ctx.fillText("Place Your Bets", this.x, this.y);
     } else if (state.global.dealCards) {
-      if (this.opacity >= 0) {
-        this.opacity -= this.opacityVelocity;
-        this.opacityVelocity += 0.001;
-      }
       state.ctx.font = "60px Noto Serif Lao";
-      state.ctx.fillStyle = `rgba(255,255,255,${this.opacity})`;
-      state.ctx.strokeStyle = `rgba(0,0,0,${this.opacity})`;
+      state.ctx.fillStyle = `rgba(255,255,255,1)`;
+      state.ctx.strokeStyle = `rgba(0,0,0,1)`;
       state.ctx.lineWidth = 5;
       state.ctx.strokeText("Place Your Bets", this.x, this.y);
       state.ctx.fillText("Place Your Bets", this.x, this.y);
@@ -269,108 +259,64 @@ export class PlaceBetsTitle {
 
   move() {
     if (state.global.placeBets) {
-      if (this.y < 60) {
-        this.y += 4;
+      if (this.y < 50) {
+        this.y += 6;
       } else {
-        this.y = 60;
+        this.y = 50;
       }
     } else if (state.global.dealCards) {
-      if (this.y > 0) {
-        this.y -= 1;
+      if (this.y > -50) {
+        this.y -= 6;
       } else {
-        this.y = 0;
-        this.opacity = 0;
-        this.opacityVelocity = 0.01;
+        this.y = -50;
       }
     }
   }
-
-  opacityEffect() {}
 }
 
 export class DealCardsTitle {
   constructor() {
     this.x = state.canvas.width / 2;
-    this.y = 0;
-    this.opacity = 0;
-    this.opacityVelocity = 0.01;
-    this.hidden = false;
+    this.y = -50;
   }
 
   draw() {
-    state.ctx.save();
-
-    if (state.global.dealCards && !this.hidden) {
-      if (this.opacity < 1) {
-        this.opacity += this.opacityVelocity;
-        this.opacityVelocity += 0.001;
-      }
-    }
-
-    if (this.hidden) {
-      if (this.opacity >= 0) {
-        this.opacity -= this.opacityVelocity;
-        this.opacityVelocity += 0.001;
-      }
-    }
-
-    if (state.global.dealCards) {
+    const dealCards = state.global.dealCards;
+    if (dealCards) {
+      state.ctx.save();
       state.ctx.globalAlpha = 1;
       state.ctx.font = "60px Noto Serif Lao";
-      state.ctx.fillStyle = `rgba(255,255,255,${this.opacity})`;
-      state.ctx.strokeStyle = `rgba(0,0,0,${this.opacity})`;
+      state.ctx.fillStyle = `rgba(255,255,255,1)`;
+      state.ctx.strokeStyle = `rgba(0,0,0,1)`;
       state.ctx.lineWidth = 5;
       state.ctx.strokeText("Dealing..", this.x, this.y);
       state.ctx.fillText("Dealing..", this.x, this.y);
+      state.ctx.restore();
     }
-    state.ctx.restore();
   }
 
   move() {
-    if (state.global.dealCards && !this.hidden) {
-      if (this.y < 60) {
-        this.y += 4;
-      } else {
-        this.y = 60;
-      }
-    } else if (this.hidden) {
-      if (this.y > 0) {
-        this.y -= 4;
-      } else {
-        this.y = 0;
-        this.opacity = 0;
-        this.opacityVelocity = 0.01;
-      }
-    }
-  }
-
-  toggleHidden() {
     const playerHand = state.global.playerHand;
     const dealerHand = state.global.dealerHand;
+    const dealt = utility.allCardsDealt();
     const dealCards = state.global.dealCards;
-    const playerFinished = playerHand.every(
-      (card) => card.x === card.destinationX && card.y === card.destinationY
-    );
-    const dealerFinished = dealerHand.every(
-      (card) => card.x === card.destinationX && card.y === card.destinationY
-    );
-    if (playerFinished && dealerFinished && dealCards) {
-      this.hidden = true;
+    if (
+      dealCards &&
+      !dealt &&
+      playerHand.length <= 2 &&
+      dealerHand.length <= 2
+    ) {
+      if (this.y < 50) {
+        this.y += 6;
+      } else {
+        this.y = 50;
+      }
+    } else if (dealCards && dealt) {
+      if (this.y > -50) {
+        this.y -= 6;
+      } else {
+        this.y = -50;
+      }
     }
   }
-
-  opacityEffect() {}
-}
-
-export function drawConsole() {
-  const exists = document.querySelector(".console");
-  if (exists) return;
-  const console = document.createElement("div");
-  console.classList.add("console");
-  const canvasContainer = document.querySelector(".canvas-container");
-  canvasContainer.appendChild(console);
-  drawCashContainer();
-  drawBettingCashContainer();
-  drawPlayerContainer();
-  drawDealerContainer();
 }
